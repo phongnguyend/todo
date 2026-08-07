@@ -1,0 +1,51 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: TodoApi/Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Data Source=/data/todo.db
+      FileStorage__Path: /data/uploads
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-use-at-least-32-bytes-long}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    volumes:
+      - app_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  worker:
+    build:
+      context: .
+      dockerfile: TodoWorker/Dockerfile
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__DefaultConnection: Data Source=/data/todo.db
+      Smtp__Host: mailpit
+      Smtp__Port: 1025
+      Smtp__EnableSsl: "false"
+      Smtp__From: ${EMAIL_SENDER:-noreply@example.com}
+      Worker__RecipientEmail: ${EMAIL_RECIPIENT:-admin@example.com}
+      Worker__IntervalMinutes: ${WORKER_INTERVAL_MINUTES:-60}
+    volumes:
+      - app_data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  mailpit:
+    image: axllent/mailpit:v1.30.0
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_HTTP_PORT:-8025}:8025"
+
+volumes:
+  app_data:

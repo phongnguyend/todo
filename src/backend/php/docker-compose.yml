@@ -1,0 +1,71 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: build/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY:-base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+      APP_URL: http://localhost:${API_PORT:-8080}
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /data/todo.sqlite
+      FILE_STORAGE_PATH: /data/uploads
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-use-at-least-32-bytes-long}
+    command:
+      - sh
+      - -c
+      - >-
+        mkdir -p /data/uploads &&
+        php artisan migrate --force &&
+        chown -R www-data:www-data /data &&
+        php artisan config:cache &&
+        php-fpm -D &&
+        nginx -g 'daemon off;'
+    ports:
+      - "${API_PORT:-8080}:8080"
+    volumes:
+      - app_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/up"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  worker:
+    build:
+      context: .
+      dockerfile: build/worker/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY:-base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /data/todo.sqlite
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_ENCRYPTION: ""
+      MAIL_FROM_ADDRESS: ${EMAIL_SENDER:-noreply@example.com}
+      MAIL_REMINDER_RECIPIENT: ${EMAIL_RECIPIENT:-admin@example.com}
+    volumes:
+      - app_data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  mailpit:
+    image: axllent/mailpit:v1.30.0
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_HTTP_PORT:-8025}:8025"
+
+volumes:
+  app_data:

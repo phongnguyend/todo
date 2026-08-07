@@ -1,0 +1,52 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: build/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      DATABASE_DSN: /data/todo.db
+      FILE_STORAGE_PATH: /data/uploads
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-use-at-least-32-bytes-long}
+      PASSWORD_RESET_SECRET_KEY: ${PASSWORD_RESET_SECRET_KEY:-change-me-too}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    volumes:
+      - app_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  worker:
+    build:
+      context: .
+      dockerfile: build/worker/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_DSN: /data/todo.db
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_USE_TLS: "false"
+      EMAIL_SENDER: ${EMAIL_SENDER:-noreply@example.com}
+      EMAIL_RECIPIENT: ${EMAIL_RECIPIENT:-admin@example.com}
+      WORKER_INTERVAL_MINUTES: ${WORKER_INTERVAL_MINUTES:-60}
+    volumes:
+      - app_data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  mailpit:
+    image: axllent/mailpit:v1.30.0
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_HTTP_PORT:-8025}:8025"
+
+volumes:
+  app_data:
