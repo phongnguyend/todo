@@ -85,6 +85,7 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
   const [page, setPage] = useState(1)
   const [accountOpen, setAccountOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false)
   const importInput = useRef<HTMLInputElement>(null)
   const pageSize = 5
 
@@ -174,7 +175,6 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
           <div className="search-wrap">
             <Search size={18} />
             <input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1) }} placeholder="Search your tasks" aria-label="Search tasks" />
-            <kbd>⌘ K</kbd>
           </div>
           <div className="account-wrap">
             <button className="avatar" aria-label="Open account menu" aria-expanded={accountOpen} onClick={() => setAccountOpen((value) => !value)}>{email.slice(0, 2).toUpperCase()}</button>
@@ -182,7 +182,7 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
               <div className="account-summary"><span>{email.slice(0, 2).toUpperCase()}</span><div><strong>{email.split('@')[0]}</strong><small>{email}</small></div></div>
               <div className="account-rule" />
               <button role="menuitem" onClick={() => { setProfileOpen(true); setAccountOpen(false) }}><UserRound size={17} />View profile</button>
-              <button role="menuitem" className="logout-item" onClick={onLogout}><LogOut size={17} />Log out</button>
+              <button role="menuitem" className="logout-item" onClick={() => { setLogoutConfirmOpen(true); setAccountOpen(false) }}><LogOut size={17} />Log out</button>
             </div>}
           </div>
         </header>
@@ -252,6 +252,7 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
       {composerOpen && <TaskComposer onClose={() => setComposerOpen(false)} onSubmit={addTask} />}
       {selected && <TaskDetail task={selected} onClose={() => setSelected(null)} onComplete={() => toggleTask(selected)} onDelete={() => removeTask(selected)} />}
       {profileOpen && <ProfileDrawer email={email} onClose={() => setProfileOpen(false)} />}
+      {logoutConfirmOpen && <LogoutConfirmation onCancel={() => setLogoutConfirmOpen(false)} onConfirm={onLogout} />}
       {notice && <div className="toast" role="status"><Check size={16} />{notice}</div>}
     </div>
   )
@@ -345,6 +346,20 @@ function ProfileDrawer({ email, onClose }: { email: string; onClose: () => void 
       </div>
       <div className="profile-footer"><button className="secondary-button" onClick={onClose}>Close</button></div>
     </aside>
+  </div>
+}
+
+function LogoutConfirmation({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: () => void }) {
+  return <div className="modal-layer" role="dialog" aria-modal="true" aria-labelledby="logout-title" onMouseDown={(event) => event.target === event.currentTarget && onCancel()}>
+    <div className="logout-confirmation">
+      <span className="logout-confirm-icon"><LogOut size={24} /></span>
+      <h2 id="logout-title">Log out of Donezo?</h2>
+      <p>You’ll need to sign in again to access your tasks and account.</p>
+      <div className="logout-confirm-actions">
+        <button className="secondary-button" onClick={onCancel}>Stay signed in</button>
+        <button className="confirm-logout-button" onClick={onConfirm}><LogOut size={16} /> Log out</button>
+      </div>
+    </div>
   </div>
 }
 

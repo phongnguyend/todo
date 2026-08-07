@@ -49,7 +49,6 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .search-wrap { width: min(420px, 46vw); display: flex; align-items: center; gap: 10px; color: #948e86; }
 .search-wrap input { background: transparent; border: 0; outline: 0; min-width: 0; flex: 1; color: var(--ink); }
 .search-wrap input::placeholder { color: #a19c94; }
-.search-wrap kbd { border: 1px solid #d9d4cd; background: #faf8f4; border-radius: 5px; color: #9d9890; font: 500 10px inherit; padding: 4px 6px; }
 .account-wrap { position: relative; margin-left: auto; }
 .avatar { width: 35px; height: 35px; border: 0; border-radius: 50%; color: white; background: #6b8478; font-weight: 700; font-size: 11px; box-shadow: inset 0 0 0 3px rgba(255,255,255,.25); }
 .account-menu { position: absolute; right: 0; top: calc(100% + 11px); width: 240px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 8px; box-shadow: 0 16px 45px rgba(42,38,33,.16); animation: rise .16s ease; }
@@ -229,6 +228,14 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .reset-success > span { width: 62px; height: 62px; display: inline-flex; align-items: center; justify-content: center; color: var(--green); background: #eaf2ee; border-radius: 18px; }
 .reset-success h2 { font: 800 27px 'Manrope'; letter-spacing: -.8px; margin: 20px 0 9px; }
 .reset-success p { color: #807a72; font-size: 12px; line-height: 1.65; margin: 0 0 25px; }
+.logout-confirmation { width: min(400px, 100%); text-align: center; background: var(--paper); border-radius: 16px; padding: 30px 28px 24px; box-shadow: 0 24px 80px rgba(31,28,25,.24); animation: rise .2s ease; }
+.logout-confirm-icon { width: 54px; height: 54px; display: inline-flex; align-items: center; justify-content: center; color: #c05544; background: #fff0ec; border-radius: 16px; }
+.logout-confirmation h2 { font: 800 22px 'Manrope'; letter-spacing: -.6px; margin: 18px 0 8px; }
+.logout-confirmation p { max-width: 305px; color: #817b73; font-size: 12px; line-height: 1.6; margin: 0 auto 24px; }
+.logout-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.logout-confirm-actions > button { width: 100%; }
+.confirm-logout-button { height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 0; border-radius: 9px; color: white; background: #c45b49; font-size: 12px; font-weight: 700; }
+.confirm-logout-button:hover { background: #ab4c3c; }
 
 @keyframes fade-in { from { opacity: 0; } }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
@@ -261,7 +268,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   .mobile-mark { display: flex !important; align-items: center; gap: 7px; font: 800 18px 'Manrope'; }
   .mobile-mark .brand-symbol { width: 22px; height: 22px; border-radius: 7px 7px 7px 2px; }
   .search-wrap { margin-left: auto; width: auto; }
-  .search-wrap input, .search-wrap kbd { display: none; }
+  .search-wrap input { display: none; }
   .account-wrap { margin-left: 15px; }
   .content { width: calc(100% - 28px); padding: 32px 0 50px; }
   .intro { align-items: center; margin-bottom: 24px; }
